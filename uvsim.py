@@ -5,6 +5,7 @@ class UVSim:
         self.program_counter = 0 # Keeps track of current instruction
         self.running = True      # Controls program execution
 
+
     def load_program_from_file(self, filename):
         try:
             instruction_count = 0
@@ -40,6 +41,13 @@ class UVSim:
             print(f"Error loading file: {str(e)}")
             return False
 
+    def get_input(self):
+        """
+        Function for input that can be overridden in tests for 
+        easier mock inputs.
+        """
+        return input("Enter a number: ")
+
     def execute(self):
         print("\n*** Program execution begins ***")
         while self.running and self.program_counter < 100:
@@ -51,13 +59,13 @@ class UVSim:
 
             if opcode == 10:   # READ
                 try:
-                    value = int(input("Enter a number: "))
-                    if -9999 <= value <= 9999:
-                        self.memory[operand] = value
-                    else:
-                        print("Error: Number must be between -9999 and +9999")
+                    value = int(self.get_input())
+                    if not -9999 <= value <= 9999:
+                        raise ValueError("Invalid input, enter a 4 digit number")
+                    self.memory[operand] = value
+                    
                 except ValueError:
-                    print("Error: Please enter a valid number")
+                    raise ValueError("Invalid input, enter a 4 digit number")
                     
             elif opcode == 11:  # WRITE
                 print(f"Output: {self.memory[operand]}")
@@ -85,7 +93,7 @@ class UVSim:
                 self.accumulator *= self.memory[operand]
                 
             elif opcode == 40:  # BRANCH
-                self.program_counter = operand
+                self.program_counter = operand - 1
                 
             elif opcode == 41:  # BRANCHNEG
                 if self.accumulator < 0:
