@@ -1,6 +1,7 @@
 import unittest
 from uvsim import UVSim
-
+from io import StringIO
+import sys
 class TestUVSim(unittest.TestCase):
 
     def setUp(self):
@@ -9,7 +10,7 @@ class TestUVSim(unittest.TestCase):
     # I/O Tests
     def test_read_valid_input(self):
         self.sim.memory[5] = 0
-        self.sim.memory[0] = 1005  # READ 05
+        self.sim.memory[0] = 1005  
         
         # Simulating input directly by modifying the method in the class
         self.sim.get_input = lambda: '1234'  # Mock input value directly
@@ -28,11 +29,6 @@ class TestUVSim(unittest.TestCase):
     def test_write_output(self):
         self.sim.memory[10] = 5678
         self.sim.memory[0] = 1110
-        
-        # Capture print output by redirecting stdout
-        from io import StringIO
-        import sys
-        
         captured_output = StringIO()
         sys.stdout = captured_output
         
@@ -56,8 +52,7 @@ class TestUVSim(unittest.TestCase):
         self.sim.memory[0] = 3205
         
         # Capture print output by redirecting stdout
-        from io import StringIO
-        import sys
+        
         
         captured_output = StringIO()
         sys.stdout = captured_output
@@ -70,18 +65,14 @@ class TestUVSim(unittest.TestCase):
 
     # Control Tests
     def test_branch_valid(self):
-        self.sim.memory[0] = 4020  # BRANCH 20
+        self.sim.memory[0] = 4020  
         self.sim.execute()
         self.assertEqual(self.sim.program_counter, 20)
 
     def test_halt_execution(self):
         self.sim.memory[0] = 4300  # HALT
         self.sim.memory[1] = 1110  # This should not execute
-        
-        # Capture print output for halting
-        from io import StringIO
-        import sys
-        
+
         captured_output = StringIO()
         sys.stdout = captured_output
         
