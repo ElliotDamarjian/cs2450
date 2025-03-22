@@ -6,6 +6,7 @@ class UVSim:
         self.memory = []
         self.accumulator = 0
         self.instruction_counter = 0
+        self.last_directory = ""  # remember the last used directory
 
         # Default theme
         self.primary_color = "#4C721D"  # UVU Green
@@ -19,6 +20,17 @@ class UVSim:
 
     def create_widgets(self, root):
         """Creates all GUI widgets."""
+        # Menu Bar
+        menubar = tk.Menu(root)
+        root.config(menu=menubar)
+        
+        file_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="File", menu=file_menu)
+        file_menu.add_command(label="Load from File", command=self.load_from_file)
+        file_menu.add_command(label="Save to File", command=self.save_to_file)
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=root.quit)
+        
         # Instruction Input
         self.instruction_label = tk.Label(root, text="Enter a BasicML Command:", bg=self.primary_color, fg="white")
         self.instruction_label.pack()
@@ -113,23 +125,58 @@ class UVSim:
         self.output_text.config(state=tk.DISABLED)
 
     def load_from_file(self):
-        """Loads a program from a file into memory."""
-        file_path = filedialog.askopenfilename()
+        """Loads a program from a file into memory from user-specified location."""
+        file_path = filedialog.askopenfilename(
+            initialdir=self.last_directory,
+            title="Select Program File",
+            filetypes=(("Text files", "*.txt"), ("All files", "*.*"))
+        )
         if file_path:
-            with open(file_path, 'r') as file:
-                content = file.read().splitlines()
-                self.memory_listbox.delete(0, tk.END)
-                self.memory.clear()
+            self.last_directory = file_path.rsplit('/', 1)[0]  # Update last used directory
+            try:
+                with open(file_path, 'r') as file:
+                    content = file.read().splitlines()
+                    self.memory_listbox.delete(0, tk.END)
+                    self.memory.clear()
 
-                for line in content:
-                    try:
-                        instruction = int(line)
-                        index = len(self.memory)
-                        self.memory.append(instruction)
-                        self.memory_listbox.insert(tk.END, f"{index}: {instruction}")
-                    except ValueError:
-                        messagebox.showerror("Error", "Invalid instruction format in file.")
-                        return
+                    for line in content:
+                        try:
+                            instruction = int(line.strip())
+                            index = len(self.memory)
+                            self.memory.append(instruction)
+                            self.memory_listbox.insert(tk.END, f"{index}: {instruction}")
+                        except ValueError:
+                            messagebox.showerror("Error", "Invalid instruction format in file.")
+                            return
+                    self.output_text.config(state=tk.NORMAL)
+                    self.output_text.insert(tk.END, f"Loaded program from {file_path}\n")
+                    self.output_text.config(state=tk.DISABLED)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to load file: {str(e)}")
+                
+    def save_to_file(self):
+        """Saves the current memory contents to a user-specified file."""
+        if not self.memory:
+            messagebox.showerror("Error", "No program in memory to save.")
+            return
+
+        file_path = filedialog.asksaveasfilename(
+            initialdir=self.last_directory,
+            title="Save Program As",
+            defaultextension=".txt",
+            filetypes=(("Text files", "*.txt"), ("All files", "*.*"))
+        )
+        if file_path:
+            self.last_directory = file_path.rsplit('/', 1)[0]  # Update last used directory
+            try:
+                with open(file_path, 'w') as file:
+                    for instruction in self.memory:
+                        file.write(f"{instruction}\n")
+                self.output_text.config(state=tk.NORMAL)
+                self.output_text.insert(tk.END, f"Program saved to {file_path}\n")
+                self.output_text.config(state=tk.DISABLED)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to save file: {str(e)}")
 
     def show_help(self):
         """Displays help information."""
