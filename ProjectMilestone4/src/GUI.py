@@ -61,6 +61,19 @@ class UVSim:
         self.file_button = tk.Button(self.button_frame, text="Load from File", command=self.load_from_file, bg=self.off_color)
         self.file_button.pack(side=tk.LEFT, padx=5)
 
+        self.delete_button = tk.Button(self.button_frame, text="Delete Command", command=self.delete_command, bg=self.off_color)
+        self.delete_button.pack(side=tk.LEFT, padx=5)
+
+        self.modify_button = tk.Button(self.button_frame, text="Cut", command=self.cut_command, bg=self.off_color)
+        self.modify_button.pack(side=tk.LEFT, padx=5)
+
+        self.delete_button = tk.Button(self.button_frame, text="Copy", command=self.copy_command, bg=self.off_color)
+        self.delete_button.pack(side=tk.LEFT, padx=5)
+
+        self.modify_button = tk.Button(self.button_frame, text="Paste", command=self.paste_command, bg=self.off_color)
+        self.modify_button.pack(side=tk.LEFT, padx=5)
+
+
         # Accumulator & Instruction Counter Display
         self.status_frame = tk.Frame(root, bg=self.primary_color)
         self.status_frame.pack(pady=5)
@@ -153,7 +166,7 @@ class UVSim:
                     self.output_text.config(state=tk.DISABLED)
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load file: {str(e)}")
-                
+
     def save_to_file(self):
         """Saves the current memory contents to a user-specified file."""
         if not self.memory:
@@ -208,11 +221,81 @@ class UVSim:
         self.output_text.config(bg=self.off_color, fg="black")
         self.command_input.config(bg=self.off_color, fg="black")
 
-        buttons = [self.load_button, self.execute_button, self.file_button, self.color_button, self.help_button, self.add_command_button]
+        buttons = [self.load_button, self.execute_button, self.file_button, self.color_button, self.help_button, self.add_command_button, self.delete_button, self.modify_button]
         for button in buttons:
             button.config(bg=self.off_color, fg="black")
 
         self.button_frame.config(bg=self.primary_color)
+
+    def delete_command(self):
+        """Deletes a selected command from memory."""
+        try:
+            index = self.memory_listbox.curselection()[0]
+            self.memory_listbox.delete(index)
+            self.memory.pop(index)
+            
+            # Update listbox indices
+            self.memory_listbox.delete(0, tk.END)
+            for i, instruction in enumerate(self.memory):
+                self.memory_listbox.insert(tk.END, f"{i}: {instruction}")
+        except IndexError:
+            messagebox.showerror("Error", "Select a command to delete.")
+
+    def modify_command(self):
+        """Modifies a selected command in memory."""
+        try:
+            index = self.memory_listbox.curselection()[0]
+            command = self.command_input.get().strip()
+            if command:
+                try:
+                    instruction = int(command)
+                    self.memory[index] = instruction
+                    self.memory_listbox.delete(index)
+                    self.memory_listbox.insert(index, f"{index}: {instruction}")
+                    self.command_input.delete(0, tk.END)
+                except ValueError:
+                    messagebox.showerror("Error", "Invalid command. Must be an integer.")
+            else:
+                messagebox.showerror("Error", "Enter a new command to modify.")
+        except IndexError:
+            messagebox.showerror("Error", "Select a command to modify.")
+
+    def copy_command(self):
+        """Copies a selected command."""
+        try:
+            index = self.memory_listbox.curselection()[0]
+            self.clipboard = self.memory_listbox.get(index).split(": ")[1]
+        except IndexError:
+            messagebox.showerror("Error", "Select a command to copy.")
+
+    def cut_command(self):
+        """Cuts a selected command."""
+        try:
+            index = self.memory_listbox.curselection()[0]
+            self.clipboard = self.memory_listbox.get(index).split(": ")[1]
+            self.memory_listbox.delete(index)
+            self.memory.pop(index)
+            
+            # Update listbox indices
+            self.memory_listbox.delete(0, tk.END)
+            for i, instruction in enumerate(self.memory):
+                self.memory_listbox.insert(tk.END, f"{i}: {instruction}")
+        except IndexError:
+            messagebox.showerror("Error", "Select a command to cut.")
+
+    def paste_command(self):
+        """Pastes the copied command into memory."""
+        if self.clipboard:
+            try:
+                instruction = int(self.clipboard)
+                index = len(self.memory)
+                self.memory.append(instruction)
+                self.memory_listbox.insert(tk.END, f"{index}: {instruction}")
+            except ValueError:
+                messagebox.showerror("Error", "Invalid command. Must be an integer.")
+        else:
+            messagebox.showerror("Error", "Nothing to paste.")
+
 
 if __name__ == "__main__":
     root = tk.Tk()
