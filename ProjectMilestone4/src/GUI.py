@@ -64,14 +64,17 @@ class UVSim:
         self.delete_button = tk.Button(self.button_frame, text="Delete Command", command=self.delete_command, bg=self.off_color)
         self.delete_button.pack(side=tk.LEFT, padx=5)
 
-        self.modify_button = tk.Button(self.button_frame, text="Cut", command=self.cut_command, bg=self.off_color)
+        self.modify_button = tk.Button(self.button_frame, text="Modify Command", command=self.modify_command, bg=self.off_color)
         self.modify_button.pack(side=tk.LEFT, padx=5)
 
-        self.delete_button = tk.Button(self.button_frame, text="Copy", command=self.copy_command, bg=self.off_color)
-        self.delete_button.pack(side=tk.LEFT, padx=5)
+        self.cut_button = tk.Button(self.button_frame, text="Cut", command=self.cut_command, bg=self.off_color)
+        self.cut_button.pack(side=tk.LEFT, padx=5)
 
-        self.modify_button = tk.Button(self.button_frame, text="Paste", command=self.paste_command, bg=self.off_color)
-        self.modify_button.pack(side=tk.LEFT, padx=5)
+        self.copy_button = tk.Button(self.button_frame, text="Copy", command=self.copy_command, bg=self.off_color)
+        self.copy_button.pack(side=tk.LEFT, padx=5)
+
+        self.paste_button = tk.Button(self.button_frame, text="Paste", command=self.paste_command, bg=self.off_color)
+        self.paste_button.pack(side=tk.LEFT, padx=5)
 
 
         # Accumulator & Instruction Counter Display
@@ -221,7 +224,7 @@ class UVSim:
         self.output_text.config(bg=self.off_color, fg="black")
         self.command_input.config(bg=self.off_color, fg="black")
 
-        buttons = [self.load_button, self.execute_button, self.file_button, self.color_button, self.help_button, self.add_command_button, self.delete_button, self.modify_button]
+        buttons = [self.load_button, self.execute_button, self.file_button, self.color_button, self.help_button, self.add_command_button, self.delete_button, self.modify_button, self.cut_button, self.copy_button, self.paste_button]
         for button in buttons:
             button.config(bg=self.off_color, fg="black")
 
