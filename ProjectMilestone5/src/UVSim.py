@@ -33,19 +33,19 @@ class UVSim:
                         elif len(line) == 6:
                             detected_format = 'new'
                         else:
-                            print("Error: Unrecognized word length. Use either 4-digit or 6-digit words.")
+                            print("Error - word length. Use either 4-digit or 6-digit code.")
                             return False
-                        self.file_format = detected_format  # Save the format for use during execution
+                        self.file_format = detected_format 
 
                     # Enforce uniform word format across the entire file
                     expected_length = 4 if detected_format == 'old' else 6
                     if len(line) != expected_length:
-                        print("Error: Mixed word formats detected. File must consist of only 4-digit or 6-digit words.")
+                        print("Error - mixed word formats detected. File must consist of only 4-digit or 6-digit code.")
                         return False
 
                     # Prevent files from having more than 250 commands
                     if instruction_count >= 250:
-                        print("Error: File exceeds the maximum program size of 250 lines.")
+                        print("Error - File exceeds the maximum program size of 250 lines.")
                         return False
 
                     try:
@@ -54,27 +54,27 @@ class UVSim:
                         # Validate the numerical value depending on file format:
                         if detected_format == 'old':
                             if not -9999 <= word <= 9999:
-                                print(f"Warning: Invalid number {word} at line {instruction_count+1}. Must be between -9999 and 9999.")
+                                print(f"Warning - Invalid number {word} at line {instruction_count+1}. Must be between -9999 and 9999.")
                                 continue
                         else:  # new format
                             if not -99999 <= word <= 99999:
-                                print(f"Warning: Invalid number {word} at line {instruction_count+1}. Must be between -99999 and 99999.")
+                                print(f"Warning - Invalid number {word} at line {instruction_count+1}. Must be between -99999 and 99999.")
                                 continue
 
                         self.memory[instruction_count] = word
                         instruction_count += 1
                     except ValueError:
-                        print(f"Error: Invalid instruction format at line {instruction_count + 1}.")
+                        print(f"Error - Invalid instruction format at line {instruction_count + 1}.")
                         return False
 
             print(f"Loaded {instruction_count} instructions successfully ({detected_format} format).")
             return True
 
         except FileNotFoundError:
-            print(f"Error: Could not find file '{filename}'")
+            print(f"Error - Could not find file '{filename}'")
             return False
         except Exception as e:
-            print(f"Error loading file: {str(e)}")
+            print(f"Error loading file - {str(e)}")
             return False
 
     def get_input(self):
@@ -88,7 +88,7 @@ class UVSim:
         while self.running and self.program_counter < 250:
             instruction = self.memory[self.program_counter]
 
-            # Decode opcode and operand based on file format
+            # Decode opcode and operand based on file digit size ( 4 or 6 digits)
             if self.file_format == 'old':
                 opcode = abs(instruction) // 100   # 2-digit opcode
                 operand = abs(instruction) % 100   # 2-digit operand
@@ -96,12 +96,12 @@ class UVSim:
                 opcode = abs(instruction) // 1000  # 3-digit opcode (e.g., 010 becomes 10)
                 operand = abs(instruction) % 1000  # 3-digit operand
             else:
-                print("Error: File format not recognized. Cannot execute program.")
+                print("Error - File format not recognized. Cannot execute program.")
                 break
 
-            # Validate operand (memory address should be within 0 to 249)
+            # Validate operand (memory address should be within 0 to 249 or send error)
             if operand < 0 or operand > 249:
-                print(f"Error: Invalid memory address {operand}. Must be between 000 and 249.")
+                print(f"Error - Invalid memory address {operand}. Must be between 000 and 249.")
                 self.running = False
                 break
 
@@ -113,10 +113,10 @@ class UVSim:
                     value = int(self.get_input())
                     if self.file_format == 'old':
                         if not -9999 <= value <= 9999:
-                            raise ValueError("Invalid input: must be a 4-digit number.")
+                            raise ValueError("Invalid input - must be a 4-digit number.")
                     else:
                         if not -99999 <= value <= 99999:
-                            raise ValueError("Invalid input: must be a 6-digit number.")
+                            raise ValueError("Invalid input - must be a 6-digit number.")
                     self.memory[operand] = value
                 except ValueError as e:
                     raise ValueError(str(e))
@@ -181,10 +181,10 @@ class UVSim:
                 self.running = False
 
             else:
-                print(f"Error: Invalid opcode {opcode}.")
+                print(f"Error - Invalid opcode {opcode}.")
                 self.running = False
 
-        print(f"Final Accumulator Value: {self.accumulator}")
+        print(f"Final Accumulator Value - {self.accumulator}")
 
 def main():
     while True:
